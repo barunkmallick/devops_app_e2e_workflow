@@ -1,0 +1,98 @@
+def slackChannel = "#devops-workshop"
+
+node() {
+	deleteDir()
+	try {
+		stage("SCM Code Checkout") {
+			checkoutGit('master', "DemoJavaApp", "https://ram_kannan@bitbucket.org/ram_kannan/devops_app_e2e_workflow.git")
+        }
+
+	    stage("Maven Build") {
+    	    withMaven(maven: 'maven3') {
+    	    	sh "cd DemoJavaApp/ ; mvn clean install"
+    	    }
+	    }
+
+	    stage("Upload Artifacts") {
+	        withMaven(maven: 'maven3') {
+	    		sh "cd DemoJavaApp/ ; mvn deploy:deploy-file -DgroupId=workshop -DartifactId=DemoApp -Dversion=1.0.2-SNAPSHOT -DgeneratePom=true -Dpackaging=war -DrepositoryId=maven-snapshots -Durl=http://localhost:8081/repository/maven-snapshots/ -DpomFile=pom.xml -Dfile=target/MavenWebApp.war"
+	        }
+	   }
+
+	    stage("Maven Direct Deploy") {
+	    	withMaven(maven: 'maven3') {
+	    	    sh """
+	    	    	mvn dependency:get -DremoteRepositories=http://localhost:8081/repository/maven-snapshots -DgroupId=workshop -DartifactId=DemoApp -Dversion=1.0.2-SNAPSHOT -Dtransitive=false -Dpackaging=war
+	    	    	mvn dependency:copy -Dtype=war -Dartifact=workshop:DemoApp:1.0.2-SNAPSHOT:war  -DoutputDirectory=/opt/tomcat/webapps/
+				"""
+	        }
+	    }
+
+	    stage("Ansible Deploy") {
+       		sh "ansible-playbook devops_app_e2e_workflow/scripts/deployWar.yml --connection=local -e nexus_path='${env.NEXUS_URL}' -e tomcat_path='${env.TOMCAT_PATH}'"
+	    }
+
+	    stage("Docker Deploy") {
+	      	withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerCloud', usernameVariable: 'userId', passwordVariable: 'passwd']]) {
+	            dir("DemoJavaApp") {
+		    		sh """
+				    	docker ps -a | awk '{ print \$1,\$2 }' | grep demojavaapp | awk '{print \$1 }' | xargs -I {} docker rm {} --force
+			            docker ps -a
+					"""
+        			sh """
+        			    docker build . -t ramkannan91/demojavaapp -f Dockerfile
+				    	docker login -u ${userId} -p '${passwd}' docker.io
+				    	docker push ramkannan91/demojavaapp:latest
+				    	docker run -d -p 8087:8080 ramkannan91/demojavaapp:latest
+    				"""
+	            }
+	        }
+	    }
+
+	    stage("Run Tests") {
+	        println "Running Tests"
+	        sh "sleep 30"
+	    	println "====> Testing for ANSIBLE Deployment Tomcat"
+	    	sh "curl http://localhost:8089/DemoApp-1.0.2/"
+	    	println "====> Testing for DIRECT (mvn) Deployment Tomcat"
+	    	sh "curl http://localhost:8088/DemoApp-1.0.2-SNAPSHOT/" 
+	    	println "====> Testing for DOCKER Deployment Tomcat"
+	    	sh "curl http://localhost:8087/devops_app_e2e_workflow/"
+	    }
+
+	    stage("Post Build") {
+	    	currentBuild.displayName = "DemoApp-${env.BUILD_NUMBER}" 
+	    	slackSuccess(slackChannel)
+	    }
+    } catch (err) {
+        println("================ ERROR: ${err}")
+		currentBuild.displayName = "DemoApp-${env.BUILD_NUMBER}" 
+    	slackFailure(slackChannel)
+        currentBuild.result = "FAILURE"
+        error()
+    }
+}
+
+def checkoutGit(branchName, targetDir, repoURL) {
+    checkout([$class: 'GitSCM',
+      branches: [[name: branchName]],
+      doGenerateSubmoduleConfigurations: false,
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: targetDir]],
+      submoduleCfg: [],
+      userRemoteConfigs: [[credentialsId: 'git-stash-commoncloud-jenkins', url: repoURL]]
+    ])
+}
+
+def slackSuccess(slackChannel) {
+    slackSend (
+        channel: slackChannel,
+        color: "#008000",
+        message: ":blush: *SUCCESS*\n_Deployment_ Completed for *${currentBuild.displayName}*.\nBuild URL - ${env.BUILD_URL}")
+}
+
+def slackFailure(slackChannel) {
+    slackSend (
+        channel: slackChannel,
+        color: "#FF0000",
+        message: ":dizzy_face: *FAILURE*\n_Deployment_ Failed for *${currentBuild.displayName}*.\nBuild URL - ${env.BUILD_URL}")
+}

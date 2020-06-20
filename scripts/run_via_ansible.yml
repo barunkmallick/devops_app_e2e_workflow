@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - git:
+       repo: 'https://ram_kannan@bitbucket.org/ram_kannan/devops_app_e2e_workflow.git'
+       dest: ansibleDemo/
+
+    - name: Running mvn clean
+      shell: "cd ansibleDemo/ ; mvn clean install"
+      register: mvn_result
+
+    - name: "mvn clean task output"
+      debug:
+       var: mvn_result
+
+    - name: ansible copy file locally.
+      copy:
+        src: ansibleDemo/target/DemoDevOpsApp.war
+        dest: /opt/tomcat/webapps/
+      delegate_to: localhost
