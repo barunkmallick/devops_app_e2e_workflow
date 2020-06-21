@@ -31,21 +31,6 @@ cd devops_app_e2e_workflow/scripts/
 ./jenkins_plugin_install.sh job-dsl,envinject,envinject-api,maven-plugin,javadoc,pipeline-maven,config-file-provider,docker-java-api,rebuild,saferestart,docker-plugin,docker-build-step,docker-custom-build-environment,findbugs,blueocean,blueocean-github-pipeline,blueocean-jwt,blueocean-rest,blueocean-commons,blueocean-dashboard,blueocean-pipeline-editor,blueocean-personalization,jenkins-design-language,blueocean-web,blueocean-autofavorite,blueocean-jira,blueocean-events,blueocean-git-pipeline,blueocean-i18n,blueocean-core-js,blueocean-bitbucket-pipeline,blueocean-config,blueocean-pipeline-api-impl,blueocean-display-url,blueocean-rest-impl,slack
 service jenkins restart
 
-#### installing nexus
-rm -rf /nexus_app
-mkdir /nexus_app && cd /nexus_app
-wget https://sonatype-download.global.ssl.fastly.net/nexus/3/latest-unix.tar.gz 
-tar -xvf latest-unix.tar.gz
-mv nexus-* nexus
-adduser nexus
-chown -R nexus:nexus /nexus_app
-sed -i -e 's/.*run_as_user.*/run_as_user="nexus"/' /nexus_app/nexus/bin/nexus.rc
-ln -s /nexus_app/nexus/bin/nexus /etc/init.d/nexus
-chkconfig --add nexus
-chkconfig --levels 345 nexus on
-usermod -aG wheel nexus
-service nexus start
-
 #### installing maven
 rm -rf /usr/local/src/apache-maven
 cd /usr/local/src
@@ -72,7 +57,7 @@ wget https://www.apache.org/dist/tomcat/tomcat-8/v8.5.55/bin/apache-tomcat-8.5.5
 tar -xf apache-tomcat-*.tar.gz
 rm -rf /opt/tomcat
 mkdir -p /opt/tomcat
-mv apache-tomcat-8.5.55/* /opt/tomcat
+mv apache-tomcat-*/* /opt/tomcat
 sed -i -e 's/8005/9006/g' /opt/tomcat/conf/server.xml 
 sed -i -e 's/Catalina/Catalina1/g' /opt/tomcat/conf/server.xml 
 sed -i -e 's/8080/8088/g' /opt/tomcat/conf/server.xml
@@ -86,7 +71,7 @@ wget https://www.apache.org/dist/tomcat/tomcat-8/v8.5.55/bin/apache-tomcat-8.5.5
 tar -xf apache-tomcat-*.tar.gz
 rm -rf /usr/local/tomcat
 mkdir -p /usr/local/tomcat
-mv apache-tomcat-8.5.55/* /usr/local/tomcat
+mv apache-tomcat-*/* /usr/local/tomcat
 sed -i -e 's/8005/9007/g' /usr/local/tomcat/conf/server.xml 
 sed -i -e 's/Catalina/Catalina2/g' /usr/local/tomcat/conf/server.xml 
 sed -i -e 's/8443/8444/g' /usr/local/tomcat/conf/server.xml 
@@ -111,6 +96,21 @@ unzip awscliv2.zip
 sudo ./aws/install
 sudo ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
 aws --version
+
+#### installing nexus
+rm -rf /nexus_app
+mkdir /nexus_app && cd /nexus_app
+wget https://sonatype-download.global.ssl.fastly.net/nexus/3/latest-unix.tar.gz 
+tar -xvf latest-unix.tar.gz
+mv nexus-* nexus
+adduser nexus
+chown -R nexus:nexus /nexus_app
+sed -i -e 's/.*run_as_user.*/run_as_user="nexus"/' /nexus_app/nexus/bin/nexus.rc
+ln -s /nexus_app/nexus/bin/nexus /etc/init.d/nexus
+chkconfig --add nexus
+chkconfig --levels 345 nexus on
+usermod -aG wheel nexus
+service nexus start
 
 usermod -aG wheel centos
 curl icanhazip.com
