@@ -95,5 +95,22 @@ sed -i -e 's/8080/8089/g' /usr/local/tomcat/conf/server.xml
 chown -R jenkins:jenkins /usr/local/tomcat
 /usr/local/tomcat/bin/startup.sh
 
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+yum install -y kubectl
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+sudo ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
+aws --version
+
 usermod -aG wheel centos
 curl icanhazip.com
