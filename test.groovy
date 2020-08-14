@@ -27,7 +27,7 @@ job('Freestyle job'){
     }
    wrappers {
 	   
-        buildName(${GERRIT_CHANGE_SUBJECT}@'JenkinsMaven#${BUILD_NUMBER}')
+        buildName("${GERRIT_CHANGE_SUBJECT}"@'JenkinsMaven#${BUILD_NUMBER}')
 	buildDescription("Executed @ ${NODE_NAME}")
 	   
     }
