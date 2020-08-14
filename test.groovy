@@ -27,7 +27,7 @@ job('Freestyle job'){
     }
    wrappers {
 	   
-        buildName("JenkinsMaven @ ${BUILD_NUMBER}")
+        buildName('JenkinsMaven#${BUILD_NUMBER}')
 	buildDescription("Executed @ ${NODE_NAME}")
 	   
     }
