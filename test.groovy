@@ -14,7 +14,7 @@ job('Freestyle job'){
         git {
             remote {
                 url('https://github.com/barunkmallick/devops_app_e2e_workflow.git')
-		credentials('')    
+		credentials('test')    
                    }
 		extensions {
                 cleanAfterCheckout()
