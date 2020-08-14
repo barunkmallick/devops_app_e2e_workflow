@@ -1,3 +1,4 @@
+
 job('Freestyle job'){
 	
     concurrentBuild(true)
@@ -27,15 +28,14 @@ job('Freestyle job'){
     }
    wrappers {
 	   
-        buildName('JenkinsMaven#${BUILD_NUMBER}')
-	   
+        buildName('JenkinsMaven@${BUILD_NUMBER}')
+	    buildUserVars()
     }
-	steps {
-
-        shell ('echo ${JOB_NAME}>log.txt')
-	shell ('echo "Hello World!">>log.txt')
+       steps {
+       buildDescription(/.*\[INFO\] Uploading project information for [^\s]* ([^\s]*)/)
+       shell ('echo ${JOB_NAME}>log.txt')
+       shell ('echo "Hello World!">>log.txt')
     	  
     }
     
 }
-
