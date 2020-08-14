@@ -1,4 +1,4 @@
-job('DSL Jobs/Freestyle job'){
+job('Freestyle job'){
 	
     concurrentBuild(true)
     
