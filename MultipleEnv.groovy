@@ -17,6 +17,7 @@ freeStyleJob(projNames) {
     
     parameters {
        stringParam('env', '','emv name:')
+       booleanParam('RUN_TESTS', true, 'uncheck to disable tests')
     }
      
     concurrentBuild(true)
