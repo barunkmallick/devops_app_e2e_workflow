@@ -17,6 +17,15 @@ freeStyleJob(jobName) {
     }
     disabled(disableProj[projNames])
     label('x86 && ubuntu')
+    
+     publishers {
+        archiveArtifacts {
+            pattern('build/test-output/**/*.html')
+            pattern('build/test-output/**/*.xml')
+            onlyIfSuccessful()
+        }
+    }
+    
     parameters {
        stringParam('env', '','emv name:')
        booleanParam('RUN_TESTS', true, 'uncheck to disable tests')
@@ -41,5 +50,12 @@ freeStyleJob(jobName) {
             branch('master/indiaSCM')
         }
      } 
+    
+    wrappers {
+         credentialsBinding {
+            file('KEYSTORE', 'keystore.jks')
+            usernamePassword('PASSWORD', 'keystore password')
+        }
+    }
 }
 }
