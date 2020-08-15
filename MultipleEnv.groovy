@@ -1,5 +1,10 @@
-def listProjNames = ['epmp_dev','epmp_Stage', 'epmp_ptod' ]
+def listProjNames = ['epmp_dev','epmp_Stage', 'epmp_Prod' ]
 
+def disableProj = [ "epmp_dev": true,
+                     "epmp_Stage": false,
+                   "epmp_Prod": false
+                  ]      
+                   
 listProjNames.eachWithIndex {projNames, index->
 
 freeStyleJob(projNames) {
@@ -8,7 +13,8 @@ freeStyleJob(projNames) {
         numToKeep(3)
         daysToKeep(3)
     }
-        
+    disabled(disableProj[projNames])
+    
     parameters {
        stringParam('env', '','emv name:')
     }
