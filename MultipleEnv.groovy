@@ -1,13 +1,15 @@
-def listProjNames = ['epmp_dev','epmp_Stage', 'epmp_Prod' ]
+def listProjNames = ['dev','stage', 'prod' ]
 
-def disableProj = [ "epmp_dev": true,
-                     "epmp_Stage": false,
-                   "epmp_Prod": false
+def disableProj = [ "dev": true,
+                    "stage": false,
+                    "prod": false
                   ]      
                    
 listProjNames.eachWithIndex {projNames, index->
 
-freeStyleJob(projNames) {
+def jobName = "epmp-${projNames}"
+    
+freeStyleJob(jobName) {
     
     logRotator {
         numToKeep(3)
