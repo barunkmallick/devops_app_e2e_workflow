@@ -1,5 +1,5 @@
 
-job('Freestyle job'){
+job('Folder1/sample-job'){
 	
     concurrentBuild(true)
     
