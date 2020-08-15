@@ -2,11 +2,13 @@ node {
     stage('Git clone') {
         deleteDir()
         checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/barunkmallick/devops_app_e2e_workflow.git']]]
+        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'maven']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/barunkmallick/maven-hello-world.git']]]
     }
+    
     stage('List') {
          sh "ls"
     }
-    stage('List') {
+    stage('Set ENv Value') {
         env.BRANCH_NAME = "master"
         env.sum = sh (label: '', returnStdout: true, script: 'echo "hello" + "world"').trim()
          
