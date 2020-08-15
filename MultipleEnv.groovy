@@ -23,7 +23,9 @@ freeStyleJob(jobName) {
     }
      
     concurrentBuild(true)
-        
+    job('epmp-dev') {
+    label(null)
+	}     
     scm {
         git {
             remote {
